@@ -54,7 +54,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
           },
         ),
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: const [
             _PerfilCirculo(color: Colors.red),
             SizedBox(width: 12),
@@ -247,30 +247,6 @@ class _ColumnaLateral extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: ElevatedButton(
-                style: _estilo(Colors.blue),
-                onPressed: onBackspace,
-                child: const Center(
-                  child: Icon(Icons.chevron_left, color: Colors.white, size: 26),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: ElevatedButton(
-                style: _estilo(Colors.blue),
-                onPressed: onAgregar,
-                child: const Center(
-                  child: Icon(Icons.add, color: Colors.white, size: 28),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: ElevatedButton(
                 style: _estilo(Colors.orange),
                 onPressed: onLimpiar,
                 child: const Center(
@@ -286,6 +262,33 @@ class _ColumnaLateral extends StatelessWidget {
               ),
             ),
           ),
+
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: ElevatedButton(
+                style: _estilo(Colors.blue),
+                onPressed: onBackspace,
+                child: const Center(
+                  child: Icon(Icons.chevron_left, color: Colors.white, size: 26),
+                ),
+              ),
+            ),
+          ),
+
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: ElevatedButton(
+                style: _estilo(Colors.blue),
+                onPressed: onAgregar,
+                child: const Center(
+                  child: Icon(Icons.add, color: Colors.white, size: 28),
+                ),
+              ),
+            ),
+          ),
+
         ],
       ),
     );
