@@ -33,9 +33,14 @@ class TecladoNumerico extends StatelessWidget {
                     backgroundColor: const Color(0xFFD9D9D9),
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
                   onPressed: () => onDigito(digito),
-                  child: Text(digito, style: const TextStyle(fontSize: 20)),
+                  child: Center(
+                    child: Text(digito, style: const TextStyle(fontSize: 20)),
+                  ),
                 ),
               ),
             );

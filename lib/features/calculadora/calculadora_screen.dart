@@ -5,13 +5,45 @@ import 'providers/calculator_notifier.dart';
 import 'widgets/producto_card.dart';
 import 'widgets/teclado_numerico.dart';
 
-class CalculadoraScreen extends ConsumerWidget {
+class CalculadoraScreen extends ConsumerStatefulWidget {
   const CalculadoraScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CalculadoraScreen> createState() => _CalculadoraScreenState();
+}
+
+class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
+  final _scrollController = ScrollController();
+  int _cantidadAnterior = 0;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollAlFinal() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(calculatorProvider);
     final notifier = ref.read(calculatorProvider.notifier);
+
+    // Si se agregó un producto nuevo, desliza la lista hasta el final
+    if (state.productos.length > _cantidadAnterior) {
+      _scrollAlFinal();
+    }
+    _cantidadAnterior = state.productos.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -39,20 +71,21 @@ class CalculadoraScreen extends ConsumerWidget {
             child: state.productos.isEmpty
                 ? const Center(child: Text('Agrega productos abajo'))
                 : ListView.builder(
-                    itemCount: state.productos.length,
-                    itemBuilder: (context, index) {
-                      final producto = state.productos[index];
-                      return ProductoCard(
-                        producto: producto,
-                        onIncrementar: () =>
-                            notifier.incrementarCantidad(producto.id),
-                        onDecrementar: () =>
-                            notifier.decrementarCantidad(producto.id),
-                        onEliminar: () =>
-                            notifier.eliminarProducto(producto.id),
-                      );
-                    },
-                  ),
+              controller: _scrollController,
+              itemCount: state.productos.length,
+              itemBuilder: (context, index) {
+                final producto = state.productos[index];
+                return ProductoCard(
+                  producto: producto,
+                  onIncrementar: () =>
+                      notifier.incrementarCantidad(producto.id),
+                  onDecrementar: () =>
+                      notifier.decrementarCantidad(producto.id),
+                  onEliminar: () =>
+                      notifier.eliminarProducto(producto.id),
+                );
+              },
+            ),
           ),
 
           // Barra de total
@@ -67,14 +100,13 @@ class CalculadoraScreen extends ConsumerWidget {
             ),
           ),
 
-          // Fila de AC + display + AC, y debajo flechas/teclado/flechas
+          // Fila de AC + display + AC
           Row(
             children: [
               _BotonLateral(
                 texto: 'AC',
                 color: Colors.red,
-                onTap: notifier
-                    .limpiarTodo, // luego conectamos el guardado en historial
+                onTap: notifier.limpiarTodo,
               ),
               Expanded(
                 child: Container(
@@ -99,6 +131,7 @@ class CalculadoraScreen extends ConsumerWidget {
             ],
           ),
 
+          // Fila de flechas/teclado/flechas
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -163,9 +196,20 @@ class _BotonLateral extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           foregroundColor: Colors.white,
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
         onPressed: onTap,
-        child: Text(texto),
+        child: Center(
+          child: Text(
+            texto,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            softWrap: false,
+            overflow: TextOverflow.visible,
+          ),
+        ),
       ),
     );
   }
@@ -182,6 +226,17 @@ class _ColumnaLateral extends StatelessWidget {
     required this.onLimpiar,
   });
 
+  ButtonStyle _estilo(Color color) {
+    return ElevatedButton.styleFrom(
+      backgroundColor: color,
+      foregroundColor: Colors.white,
+      padding: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -189,24 +244,46 @@ class _ColumnaLateral extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-              onPressed: onBackspace,
-              child: const Icon(Icons.chevron_left, color: Colors.white),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: ElevatedButton(
+                style: _estilo(Colors.blue),
+                onPressed: onBackspace,
+                child: const Center(
+                  child: Icon(Icons.chevron_left, color: Colors.white, size: 26),
+                ),
+              ),
             ),
           ),
           Expanded(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-              onPressed: onAgregar,
-              child: const Icon(Icons.add, color: Colors.white, size: 28),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: ElevatedButton(
+                style: _estilo(Colors.blue),
+                onPressed: onAgregar,
+                child: const Center(
+                  child: Icon(Icons.add, color: Colors.white, size: 28),
+                ),
+              ),
             ),
           ),
           Expanded(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              onPressed: onLimpiar,
-              child: const Text('C', style: TextStyle(color: Colors.white)),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: ElevatedButton(
+                style: _estilo(Colors.orange),
+                onPressed: onLimpiar,
+                child: const Center(
+                  child: Text(
+                    'C',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
