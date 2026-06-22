@@ -1,6 +1,9 @@
+import 'package:calculadora_tienda/features/calculadora/providers/perfil_activo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/formato_cop.dart';
+import '../../data/models/perfil_color.dart';
+import '../historial/historial_screen.dart';
 import 'providers/calculator_notifier.dart';
 import 'widgets/producto_card.dart';
 import 'widgets/teclado_numerico.dart';
@@ -36,8 +39,10 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(calculatorProvider);
-    final notifier = ref.read(calculatorProvider.notifier);
+    final perfilActivo = ref.watch(perfilActivoProvider);
+    final state = ref.watch(calculatorProvider(perfilActivo));
+    final notifier = ref.read(calculatorProvider(perfilActivo).notifier);
+
 
     // Si se agregó un producto nuevo, desliza la lista hasta el final
     if (state.productos.length > _cantidadAnterior) {
@@ -50,17 +55,32 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
         leading: IconButton(
           icon: const Icon(Icons.history),
           onPressed: () {
-            // Navegar al historial (lo conectamos en el paso 7)
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HistorialScreen()),
+            );
           },
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: const [
-            _PerfilCirculo(color: Colors.red),
-            SizedBox(width: 12),
-            _PerfilCirculo(color: Colors.blue),
-            SizedBox(width: 12),
-            _PerfilCirculo(color: Colors.green),
+          children: [
+            _PerfilCirculo(
+              color: Colors.red,
+              activo: perfilActivo == PerfilColor.rojo,
+              onTap: () => ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.rojo),
+            ),
+            const SizedBox(width: 12),
+            _PerfilCirculo(
+              color: Colors.blue,
+              activo: perfilActivo == PerfilColor.azul,
+              onTap: () => ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.azul),
+            ),
+            const SizedBox(width: 12),
+            _PerfilCirculo(
+              color: Colors.green,
+              activo: perfilActivo == PerfilColor.verde,
+              onTap: () => ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.verde),
+            ),
           ],
         ),
       ),
@@ -164,15 +184,30 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
 
 class _PerfilCirculo extends StatelessWidget {
   final Color color;
+  final bool activo;
+  final VoidCallback onTap;
 
-  const _PerfilCirculo({required this.color});
+  const _PerfilCirculo({
+    required this.color,
+    required this.activo,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 22,
-      height: 22,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+          border: activo
+              ? Border.all(color: Colors.black, width: 2.5)
+              : null,
+        ),
+      ),
     );
   }
 }
