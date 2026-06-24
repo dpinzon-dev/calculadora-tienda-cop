@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/utils/formato_cop.dart';
+import '../../../data/models/color_resaltado.dart';
 import '../../../data/models/producto.dart';
 
 class ProductoCard extends StatelessWidget {
@@ -7,6 +8,7 @@ class ProductoCard extends StatelessWidget {
   final VoidCallback onIncrementar;
   final VoidCallback onDecrementar;
   final VoidCallback onEliminar;
+  final void Function(ColorResaltado color) onCambiarResaltado;
 
   const ProductoCard({
     super.key,
@@ -14,7 +16,46 @@ class ProductoCard extends StatelessWidget {
     required this.onIncrementar,
     required this.onDecrementar,
     required this.onEliminar,
+    required this.onCambiarResaltado,
   });
+
+  Future<void> _confirmarEliminar(BuildContext context) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar producto'),
+        content:
+        const Text('¿Seguro que quieres eliminar este producto del cálculo?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      onEliminar();
+    }
+  }
+
+  Color get _colorFondo {
+    switch (producto.resaltado) {
+      case ColorResaltado.ninguno:
+        return const Color(0xFFE0E0E0);
+      case ColorResaltado.amarillo:
+        return const Color(0xFFFFF3C4);
+      case ColorResaltado.morado:
+        return const Color(0xFFE6D7F5);
+      case ColorResaltado.naranja:
+        return const Color(0xFFFFE0CC);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,14 +63,14 @@ class ProductoCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFE0E0E0),
+        color: _colorFondo,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: onEliminar,
+            onPressed: () => _confirmarEliminar(context),
           ),
           Expanded(
             child: Column(
@@ -47,6 +88,31 @@ class ProductoCard extends StatelessWidget {
               ],
             ),
           ),
+
+          // Banderitas de resaltado, ubicadas entre el precio y el "x1"
+          Row(
+            children: [
+              _BanderaResaltado(
+                color: Colors.amber,
+                activa: producto.resaltado == ColorResaltado.amarillo,
+                onTap: () => onCambiarResaltado(ColorResaltado.amarillo),
+              ),
+              const SizedBox(width: 6),
+              _BanderaResaltado(
+                color: Colors.purple,
+                activa: producto.resaltado == ColorResaltado.morado,
+                onTap: () => onCambiarResaltado(ColorResaltado.morado),
+              ),
+              const SizedBox(width: 6),
+              _BanderaResaltado(
+                color: Colors.deepOrange,
+                activa: producto.resaltado == ColorResaltado.naranja,
+                onTap: () => onCambiarResaltado(ColorResaltado.naranja),
+              ),
+            ],
+          ),
+
+          const SizedBox(width: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -60,6 +126,42 @@ class ProductoCard extends StatelessWidget {
           const SizedBox(width: 6),
           _CircleButton(icon: Icons.add, color: Colors.green, onTap: onIncrementar),
         ],
+      ),
+    );
+  }
+}
+
+class _BanderaResaltado extends StatelessWidget {
+  final Color color;
+  final bool activa;
+  final VoidCallback onTap;
+
+  const _BanderaResaltado({
+    required this.color,
+    required this.activa,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 24,
+        height: 24,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Bandera negra de fondo, un poco más grande: simula un borde cuando está activa
+            if (activa)
+              const Icon(Icons.flag, size: 24, color: Colors.black),
+            Icon(
+              Icons.flag,
+              size: activa ? 19 : 22,
+              color: color,
+            ),
+          ],
+        ),
       ),
     );
   }

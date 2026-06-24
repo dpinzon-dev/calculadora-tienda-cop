@@ -97,12 +97,10 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                 final producto = state.productos[index];
                 return ProductoCard(
                   producto: producto,
-                  onIncrementar: () =>
-                      notifier.incrementarCantidad(producto.id),
-                  onDecrementar: () =>
-                      notifier.decrementarCantidad(producto.id),
-                  onEliminar: () =>
-                      notifier.eliminarProducto(producto.id),
+                  onIncrementar: () => notifier.incrementarCantidad(producto.id),
+                  onDecrementar: () => notifier.decrementarCantidad(producto.id),
+                  onEliminar: () => notifier.eliminarProducto(producto.id),
+                  onCambiarResaltado: (color) => notifier.cambiarResaltado(producto.id, color),
                 );
               },
             ),

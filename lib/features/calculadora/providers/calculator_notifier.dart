@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/calculo.dart';
+import '../../../data/models/color_resaltado.dart';
+
 import '../../../data/models/perfil_color.dart';
 import '../../../data/models/producto.dart';
 import '../../../data/repositories/estado_calculadora_repository.dart';
@@ -147,6 +149,19 @@ class CalculatorNotifier extends FamilyNotifier<CalculatorState, PerfilColor> {
       displayActual: '0',
       origenId: calculo.id,
       modificado: false,
+    );
+    _persistir();
+  }
+
+  void cambiarResaltado(String productoId, ColorResaltado color) {
+    state = state.copyWith(
+      productos: state.productos.map((p) {
+        if (p.id != productoId) return p;
+        // Si tocas la misma bandera que ya estaba activa, se desactiva (vuelve a "ninguno")
+        final nuevoColor = p.resaltado == color ? ColorResaltado.ninguno : color;
+        return p.copyWith(resaltado: nuevoColor);
+      }).toList(),
+      modificado: true,
     );
     _persistir();
   }
