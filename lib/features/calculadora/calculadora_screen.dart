@@ -19,6 +19,11 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
   final _scrollController = ScrollController();
   int _cantidadAnterior = 0;
 
+  // Altura fija del bloque de teclado (flechas + números + flechas).
+  // Al no usar Expanded aquí, el bloque queda pegado abajo y no se estira
+  // aunque la pantalla sea más larga; el espacio extra lo absorbe la lista.
+  static const double _alturaTeclado = 280;
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -43,7 +48,6 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
     final state = ref.watch(calculatorProvider(perfilActivo));
     final notifier = ref.read(calculatorProvider(perfilActivo).notifier);
 
-
     // Si se agregó un producto nuevo, desliza la lista hasta el final
     if (state.productos.length > _cantidadAnterior) {
       _scrollAlFinal();
@@ -67,26 +71,30 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
             _PerfilCirculo(
               color: Colors.red,
               activo: perfilActivo == PerfilColor.rojo,
-              onTap: () => ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.rojo),
+              onTap: () =>
+                  ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.rojo),
             ),
             const SizedBox(width: 12),
             _PerfilCirculo(
               color: Colors.blue,
               activo: perfilActivo == PerfilColor.azul,
-              onTap: () => ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.azul),
+              onTap: () =>
+                  ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.azul),
             ),
             const SizedBox(width: 12),
             _PerfilCirculo(
               color: Colors.green,
               activo: perfilActivo == PerfilColor.verde,
-              onTap: () => ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.verde),
+              onTap: () =>
+                  ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.verde),
             ),
           ],
         ),
       ),
       body: Column(
         children: [
-          // Lista de productos
+          // Lista de productos: única parte expandible, absorbe todo el
+          // espacio sobrante de la pantalla.
           Expanded(
             child: state.productos.isEmpty
                 ? const Center(child: Text('Agrega productos abajo'))
@@ -97,10 +105,13 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                 final producto = state.productos[index];
                 return ProductoCard(
                   producto: producto,
-                  onIncrementar: () => notifier.incrementarCantidad(producto.id),
-                  onDecrementar: () => notifier.decrementarCantidad(producto.id),
+                  onIncrementar: () =>
+                      notifier.incrementarCantidad(producto.id),
+                  onDecrementar: () =>
+                      notifier.decrementarCantidad(producto.id),
                   onEliminar: () => notifier.eliminarProducto(producto.id),
-                  onCambiarResaltado: (color) => notifier.cambiarResaltado(producto.id, color),
+                  onCambiarResaltado: (color) =>
+                      notifier.cambiarResaltado(producto.id, color),
                 );
               },
             ),
@@ -149,8 +160,9 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
             ],
           ),
 
-          // Fila de flechas/teclado/flechas
-          Expanded(
+          // Bloque de flechas/teclado/flechas, con altura fija pegado abajo
+          SizedBox(
+            height: _alturaTeclado,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -201,9 +213,7 @@ class _PerfilCirculo extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: color,
-          border: activo
-              ? Border.all(color: Colors.black, width: 2.5)
-              : null,
+          border: activo ? Border.all(color: Colors.black, width: 2.5) : null,
         ),
       ),
     );
@@ -248,6 +258,7 @@ class _BotonLateral extends StatelessWidget {
   }
 }
 
+/// Columna lateral del teclado: C (10%), borrar "<" (40%) y agregar "+" (40%).
 class _ColumnaLateral extends StatelessWidget {
   final VoidCallback onBackspace;
   final VoidCallback onAgregar;
@@ -276,7 +287,9 @@ class _ColumnaLateral extends StatelessWidget {
       width: 60,
       child: Column(
         children: [
+          // C -> 10% del alto de la columna
           Expanded(
+            flex: 1,
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: ElevatedButton(
@@ -296,7 +309,9 @@ class _ColumnaLateral extends StatelessWidget {
             ),
           ),
 
+          // Borrar "<" -> 40% del alto de la columna
           Expanded(
+            flex: 4,
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: ElevatedButton(
@@ -309,11 +324,13 @@ class _ColumnaLateral extends StatelessWidget {
             ),
           ),
 
+          // Agregar "+" -> 40% del alto de la columna, ahora en verde
           Expanded(
+            flex: 4,
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: ElevatedButton(
-                style: _estilo(Colors.blue),
+                style: _estilo(Colors.green),
                 onPressed: onAgregar,
                 child: const Center(
                   child: Icon(Icons.add, color: Colors.white, size: 28),
@@ -321,7 +338,6 @@ class _ColumnaLateral extends StatelessWidget {
               ),
             ),
           ),
-
         ],
       ),
     );

@@ -24,8 +24,9 @@ class ProductoCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Eliminar producto'),
-        content:
-        const Text('¿Seguro que quieres eliminar este producto del cálculo?'),
+        content: const Text(
+          '¿Seguro que quieres eliminar este producto del cálculo?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -68,28 +69,58 @@ class ProductoCard extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // Botón eliminar
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () => _confirmarEliminar(context),
           ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  formatearCOP(producto.total),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                if (producto.cantidad > 1)
+
+          // Grupo precio + multiplicador (sin expansión)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Columna con precio y valor unitario
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    formatearCOP(producto.valorUnitario),
-                    style: const TextStyle(fontSize: 13, color: Colors.black54),
+                    formatearCOP(producto.total),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-              ],
-            ),
+                  if (producto.cantidad > 1)
+                    Text(
+                      formatearCOP(producto.valorUnitario),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black54,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(width: 10),
+              // separación entre precio y multiplicador
+              // Multiplicador (al lado del precio)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black54),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text('x${producto.cantidad}'),
+              ),
+            ],
           ),
 
-          // Banderitas de resaltado, ubicadas entre el precio y el "x1"
+          // Espacio flexible para separar el grupo de las banderitas
+          const Spacer(),
+
+          // Banderitas de resaltado
           Row(
             children: [
               _BanderaResaltado(
@@ -112,19 +143,18 @@ class ProductoCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black54),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text('x${producto.cantidad}'),
-          ),
           const SizedBox(width: 8),
-          _CircleButton(icon: Icons.remove, color: Colors.red, onTap: onDecrementar),
+          _CircleButton(
+            icon: Icons.remove,
+            color: Colors.red,
+            onTap: onDecrementar,
+          ),
           const SizedBox(width: 6),
-          _CircleButton(icon: Icons.add, color: Colors.green, onTap: onIncrementar),
+          _CircleButton(
+            icon: Icons.add,
+            color: Colors.green,
+            onTap: onIncrementar,
+          ),
         ],
       ),
     );
@@ -153,13 +183,8 @@ class _BanderaResaltado extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             // Bandera negra de fondo, un poco más grande: simula un borde cuando está activa
-            if (activa)
-              const Icon(Icons.flag, size: 24, color: Colors.black),
-            Icon(
-              Icons.flag,
-              size: activa ? 19 : 22,
-              color: color,
-            ),
+            if (activa) const Icon(Icons.flag, size: 24, color: Colors.black),
+            Icon(Icons.flag, size: activa ? 19 : 22, color: color),
           ],
         ),
       ),
@@ -172,7 +197,11 @@ class _CircleButton extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _CircleButton({required this.icon, required this.color, required this.onTap});
+  const _CircleButton({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
