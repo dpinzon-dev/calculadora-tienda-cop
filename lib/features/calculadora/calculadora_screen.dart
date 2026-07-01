@@ -1,3 +1,4 @@
+import 'package:calculadora_tienda/features/calculadora/providers/calculator_state.dart';
 import 'package:calculadora_tienda/features/calculadora/providers/perfil_activo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +23,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
   // Altura fija del bloque de teclado (flechas + números + flechas).
   // Al no usar Expanded aquí, el bloque queda pegado abajo y no se estira
   // aunque la pantalla sea más larga; el espacio extra lo absorbe la lista.
-  static const double _alturaTeclado = 280;
+  static const double _alturaTeclado = 300;
 
   @override
   void dispose() {
@@ -42,6 +43,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
     });
   }
 
+  /// Pantalla
   @override
   Widget build(BuildContext context) {
     final perfilActivo = ref.watch(perfilActivoProvider);
@@ -65,102 +67,119 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
             );
           },
         ),
+        //Perfiles
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             _PerfilCirculo(
               color: Colors.red,
               activo: perfilActivo == PerfilColor.rojo,
-              onTap: () =>
-                  ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.rojo),
+              onTap: () => ref
+                  .read(perfilActivoProvider.notifier)
+                  .cambiarA(PerfilColor.rojo),
             ),
             const SizedBox(width: 12),
             _PerfilCirculo(
               color: Colors.blue,
               activo: perfilActivo == PerfilColor.azul,
-              onTap: () =>
-                  ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.azul),
+              onTap: () => ref
+                  .read(perfilActivoProvider.notifier)
+                  .cambiarA(PerfilColor.azul),
             ),
             const SizedBox(width: 12),
             _PerfilCirculo(
               color: Colors.green,
               activo: perfilActivo == PerfilColor.verde,
-              onTap: () =>
-                  ref.read(perfilActivoProvider.notifier).cambiarA(PerfilColor.verde),
+              onTap: () => ref
+                  .read(perfilActivoProvider.notifier)
+                  .cambiarA(PerfilColor.verde),
             ),
           ],
         ),
       ),
       body: Column(
         children: [
-          // Lista de productos: única parte expandible, absorbe todo el
-          // espacio sobrante de la pantalla.
+          /// Lista de productos
           Expanded(
-            child: state.productos.isEmpty
-                ? const Center(child: Text('Agrega productos abajo'))
-                : ListView.builder(
-              controller: _scrollController,
-              itemCount: state.productos.length,
-              itemBuilder: (context, index) {
-                final producto = state.productos[index];
-                return ProductoCard(
-                  producto: producto,
-                  onIncrementar: () =>
-                      notifier.incrementarCantidad(producto.id),
-                  onDecrementar: () =>
-                      notifier.decrementarCantidad(producto.id),
-                  onEliminar: () => notifier.eliminarProducto(producto.id),
-                  onCambiarResaltado: (color) =>
-                      notifier.cambiarResaltado(producto.id, color),
-                );
-              },
+            child: _ProductList(
+              state: state,
+              scrollController: _scrollController,
+              notifier: notifier,
             ),
           ),
 
-          // Barra de total
-          Container(
-            width: double.infinity,
-            color: const Color(0xFFB2EBF2),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Text(
-              formatearCOP(state.total),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
-            ),
-          ),
+          /// Barra de total
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _BotonLateral(
+                  texto: "AC",
+                  color: Colors.red,
+                  onTap: notifier.limpiarTodo,
+                ),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFB2EBF2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
 
-          // Fila de AC + display + AC
-          Row(
-            children: [
-              _BotonLateral(
-                texto: 'AC',
-                color: Colors.red,
-                onTap: notifier.limpiarTodo,
-              ),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDCEDC8),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    formatearCOP(double.tryParse(state.displayActual) ?? 0),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 24),
+                    child: Text(
+                      formatearCOP(state.total),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              _BotonLateral(
-                texto: 'AC',
-                color: Colors.red,
-                onTap: notifier.limpiarTodo,
-              ),
-            ],
+                _BotonLateral(
+                  texto: "AC",
+                  color: Colors.red,
+                  onTap: notifier.limpiarTodo,
+                ),
+              ],
+            ),
           ),
 
-          // Bloque de flechas/teclado/flechas, con altura fija pegado abajo
+          /// Display
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _BotonLateral(
+                  texto: "C",
+                  color: Colors.orange,
+                  onTap: notifier.limpiarDisplay,
+                ),
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCEDC8),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      formatearCOP(double.tryParse(state.displayActual) ?? 0),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
+                ),
+                _BotonLateral(
+                  texto: "C",
+                  color: Colors.orange,
+                  onTap: notifier.limpiarDisplay,
+                ),
+              ],
+            ),
+          ),
+
+          /// Teclado
           SizedBox(
             height: _alturaTeclado,
             child: Row(
@@ -171,6 +190,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                   onAgregar: notifier.agregarProducto,
                   onLimpiar: notifier.limpiarDisplay,
                 ),
+
                 Expanded(
                   child: TecladoNumerico(
                     onDigito: notifier.teclear,
@@ -178,6 +198,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                     onAgregar: notifier.agregarProducto,
                   ),
                 ),
+
                 _ColumnaLateral(
                   onBackspace: notifier.borrarUltimoDigito,
                   onAgregar: notifier.agregarProducto,
@@ -192,6 +213,43 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
   }
 }
 
+//------------------------------------------------------------------------------
+
+/// LISTA SUPERIOR DE LA PANTALLA
+class _ProductList extends StatelessWidget {
+  const _ProductList({
+    required this.state,
+    required this._scrollController,
+    required this.notifier,
+  });
+
+  final CalculatorState state;
+  final ScrollController _scrollController;
+  final CalculatorNotifier notifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return state.productos.isEmpty
+        ? const Center(child: Text('Agrega productos abajo'))
+        : ListView.builder(
+            controller: _scrollController,
+            itemCount: state.productos.length,
+            itemBuilder: (context, index) {
+              final producto = state.productos[index];
+              return ProductoCard(
+                producto: producto,
+                onIncrementar: () => notifier.incrementarCantidad(producto.id),
+                onDecrementar: () => notifier.decrementarCantidad(producto.id),
+                onEliminar: () => notifier.eliminarProducto(producto.id),
+                onCambiarResaltado: (color) =>
+                    notifier.cambiarResaltado(producto.id, color),
+              );
+            },
+          );
+  }
+}
+
+/// PERFILES
 class _PerfilCirculo extends StatelessWidget {
   final Color color;
   final bool activo;
@@ -220,6 +278,7 @@ class _PerfilCirculo extends StatelessWidget {
   }
 }
 
+/// BOTONES LATERALES
 class _BotonLateral extends StatelessWidget {
   final String texto;
   final Color color;
@@ -233,16 +292,14 @@ class _BotonLateral extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 60,
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 4),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           foregroundColor: Colors.white,
           padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         onPressed: onTap,
         child: Center(
@@ -275,9 +332,7 @@ class _ColumnaLateral extends StatelessWidget {
       backgroundColor: color,
       foregroundColor: Colors.white,
       padding: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
     );
   }
 
@@ -287,17 +342,36 @@ class _ColumnaLateral extends StatelessWidget {
       width: 60,
       child: Column(
         children: [
-          // C -> 10% del alto de la columna
+          /// Borrar
           Expanded(
-            flex: 1,
+            flex: 3,
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: ElevatedButton(
-                style: _estilo(Colors.orange),
+                style: _estilo(Colors.blue),
+                onPressed: onBackspace,
+                child: const Center(
+                  child: Icon(
+                    Icons.chevron_left,
+                    color: Colors.white,
+                    size: 26,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          /// Multiplicar
+          Expanded(
+            flex: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: ElevatedButton(
+                style: _estilo(Colors.purple),
                 onPressed: onLimpiar,
                 child: const Center(
                   child: Text(
-                    'C',
+                    'X',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -309,22 +383,7 @@ class _ColumnaLateral extends StatelessWidget {
             ),
           ),
 
-          // Borrar "<" -> 40% del alto de la columna
-          Expanded(
-            flex: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: ElevatedButton(
-                style: _estilo(Colors.blue),
-                onPressed: onBackspace,
-                child: const Center(
-                  child: Icon(Icons.chevron_left, color: Colors.white, size: 26),
-                ),
-              ),
-            ),
-          ),
-
-          // Agregar "+" -> 40% del alto de la columna, ahora en verde
+          /// Agregar
           Expanded(
             flex: 4,
             child: Padding(
