@@ -8,6 +8,7 @@ import '../historial/historial_screen.dart';
 import 'providers/calculator_notifier.dart';
 import 'widgets/producto_card.dart';
 import 'widgets/teclado_numerico.dart';
+import 'widgets/devolucion_sheet.dart';
 
 class CalculadoraScreen extends ConsumerStatefulWidget {
   const CalculadoraScreen({super.key});
@@ -42,6 +43,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
       }
     });
   }
+
 
   /// Pantalla
   @override
@@ -126,12 +128,16 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
 
-                    child: Text(
-                      formatearCOP(state.total),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w600,
+                    child: GestureDetector(
+                      onTap: () => showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (_) => DevolucionSheet(totalCuenta: state.total),
+                      ),
+                      child: Text(
+                        formatearCOP(state.total),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
@@ -403,6 +409,184 @@ class _ColumnaLateral extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _VueltoSheet extends StatefulWidget {
+  final double totalCuenta;
+  const _VueltoSheet({required this.totalCuenta});
+
+  @override
+  State<_VueltoSheet> createState() => _VueltoSheetState();
+}
+
+class _VueltoSheetState extends State<_VueltoSheet> {
+  String _display = '0';
+
+  void _teclear(String digito) {
+    setState(() {
+      _display = _display == '0' ? digito : _display + digito;
+    });
+  }
+
+  void _borrar() {
+    setState(() {
+      if (_display.length <= 1) {
+        _display = '0';
+      } else {
+        _display = _display.substring(0, _display.length - 1);
+      }
+    });
+  }
+
+  static const _filas = [
+    ['7', '8', '9'],
+    ['4', '5', '6'],
+    ['1', '2', '3'],
+    ['0', '00', '000'],
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final pagado = double.tryParse(_display) ?? 0;
+    final vuelto = pagado - widget.totalCuenta;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Indicador de arrastre
+            Container(
+              width: 40, height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Fila: cuenta — pago
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Total cuenta', style: TextStyle(fontSize: 12, color: Colors.black54)),
+                    Text(formatearCOP(widget.totalCuenta),
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text('Pago con', style: TextStyle(fontSize: 12, color: Colors.black54)),
+                    Text(
+                      pagado == 0 ? '—' : formatearCOP(pagado),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const Divider(height: 24),
+
+            // Vuelto
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: vuelto >= 0 ? const Color(0xFFDCEDC8) : const Color(0xFFFFCDD2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  const Text('Vuelto', style: TextStyle(fontSize: 12, color: Colors.black54)),
+                  Text(
+                    pagado == 0 ? '—' : formatearCOP(vuelto.abs()),
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: vuelto >= 0 ? Colors.black87 : Colors.red[700],
+                    ),
+                  ),
+                  if (pagado > 0 && vuelto < 0)
+                    Text(
+                      'Faltan ${formatearCOP(vuelto.abs())}',
+                      style: TextStyle(fontSize: 12, color: Colors.red[700]),
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Display del pago
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.black12),
+              ),
+              child: Text(
+                formatearCOP(pagado),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 22),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Teclado numérico local
+            ...(_filas.map((fila) => Row(
+              children: fila.map((d) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(3),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD9D9D9),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      elevation: 0,
+                    ),
+                    onPressed: () => _teclear(d),
+                    child: Text(d, style: const TextStyle(fontSize: 18)),
+                  ),
+                ),
+              )).toList(),
+            ))),
+
+            // Botón borrar
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        elevation: 0,
+                      ),
+                      onPressed: _borrar,
+                      child: const Icon(Icons.chevron_left, size: 24),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
