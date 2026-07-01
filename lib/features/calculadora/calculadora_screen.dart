@@ -164,7 +164,9 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      formatearCOP(double.tryParse(state.displayActual) ?? 0),
+                      state.enModoMultiplicar
+                          ? '${formatearCOP(state.valorPendienteMultiplicacion!)} × ${state.displayActual == '0' ? '' : state.displayActual}'
+                          : formatearCOP(double.tryParse(state.displayActual) ?? 0),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 24),
                     ),
@@ -189,6 +191,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                   onBackspace: notifier.borrarUltimoDigito,
                   onAgregar: notifier.agregarProducto,
                   onLimpiar: notifier.limpiarDisplay,
+                  onMultiplicar: notifier.multiplicacion,
                 ),
 
                 Expanded(
@@ -203,6 +206,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                   onBackspace: notifier.borrarUltimoDigito,
                   onAgregar: notifier.agregarProducto,
                   onLimpiar: notifier.limpiarDisplay,
+                  onMultiplicar: notifier.multiplicacion,
                 ),
               ],
             ),
@@ -320,11 +324,13 @@ class _ColumnaLateral extends StatelessWidget {
   final VoidCallback onBackspace;
   final VoidCallback onAgregar;
   final VoidCallback onLimpiar;
+  final VoidCallback onMultiplicar;
 
   const _ColumnaLateral({
     required this.onBackspace,
     required this.onAgregar,
     required this.onLimpiar,
+    required this.onMultiplicar,
   });
 
   ButtonStyle _estilo(Color color) {
@@ -339,7 +345,6 @@ class _ColumnaLateral extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 60,
       child: Column(
         children: [
           /// Borrar
@@ -368,7 +373,7 @@ class _ColumnaLateral extends StatelessWidget {
               padding: const EdgeInsets.all(4),
               child: ElevatedButton(
                 style: _estilo(Colors.purple),
-                onPressed: onLimpiar,
+                onPressed: onMultiplicar,
                 child: const Center(
                   child: Text(
                     'X',

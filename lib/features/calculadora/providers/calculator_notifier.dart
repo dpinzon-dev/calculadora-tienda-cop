@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/calculo.dart';
 import '../../../data/models/color_resaltado.dart';
-
 import '../../../data/models/perfil_color.dart';
 import '../../../data/models/producto.dart';
 import '../../../data/repositories/estado_calculadora_repository.dart';
@@ -30,8 +29,6 @@ class CalculatorNotifier extends FamilyNotifier<CalculatorState, PerfilColor> {
         state = guardado;
       }
     } catch (e) {
-      // Si el formato guardado es incompatible (ej: cambiamos el modelo),
-      // simplemente arrancamos con el estado vacío en vez de romper la app.
       // ignore: avoid_print
       print('No se pudo restaurar el estado del perfil $_perfil: $e');
     }
@@ -41,13 +38,10 @@ class CalculatorNotifier extends FamilyNotifier<CalculatorState, PerfilColor> {
     await _repository.guardar(_perfil, state);
   }
 
-  /// Guarda el cálculo actual en el historial, solo si corresponde:
-  /// - Es un cálculo nuevo (sin origenId) con productos.
-  /// - O es una edición (con origenId) que sí fue modificada.
   void _guardarEnHistorialSiAplica() {
     final esCalculoNuevo = state.origenId == null;
-    final debeGuardar = state.productos.isNotEmpty &&
-        (esCalculoNuevo || state.modificado);
+    final debeGuardar =
+        state.productos.isNotEmpty && (esCalculoNuevo || state.modificado);
 
     if (debeGuardar) {
       final calculo = Calculo(
@@ -68,7 +62,42 @@ class CalculatorNotifier extends FamilyNotifier<CalculatorState, PerfilColor> {
     _persistir();
   }
 
+  /// Botón "X": guarda el precio actual como pendiente y limpia el display
+  /// para que el usuario teclee la cantidad.
+  void multiplicacion() {
+    if (state.enModoMultiplicar) return;
+    final valor = double.tryParse(state.displayActual) ?? 0;
+    if (valor <= 0) return;
+
+    state = state.copyWith(
+      displayActual: '0',
+      valorPendienteMultiplicacion: valor,
+    );
+    _persistir();
+  }
+
+
   void agregarProducto() {
+    if (state.enModoMultiplicar) {
+      final cantidad = int.tryParse(state.displayActual) ?? 0;
+      if (cantidad <= 0) return;
+
+      final nuevoProducto = Producto(
+        id: _uuid.v4(),
+        valorUnitario: state.valorPendienteMultiplicacion!,
+        cantidad: cantidad,
+      );
+
+      state = state.copyWith(
+        productos: [...state.productos, nuevoProducto],
+        displayActual: '0',
+        limpiarPendiente: true,
+        modificado: true,
+      );
+      _persistir();
+      return;
+    }
+
     final valor = double.tryParse(state.displayActual) ?? 0;
     if (valor <= 0) return;
 
@@ -117,7 +146,30 @@ class CalculatorNotifier extends FamilyNotifier<CalculatorState, PerfilColor> {
     _persistir();
   }
 
+  void cambiarResaltado(String productoId, ColorResaltado color) {
+    state = state.copyWith(
+      productos: state.productos.map((p) {
+        if (p.id != productoId) return p;
+        final nuevoColor =
+        p.resaltado == color ? ColorResaltado.ninguno : color;
+        return p.copyWith(resaltado: nuevoColor);
+      }).toList(),
+      modificado: true,
+    );
+    _persistir();
+  }
+
   void borrarUltimoDigito() {
+    if (state.enModoMultiplicar && state.displayActual == '0') {
+      // Cancela la multiplicación y restaura el precio original en el display
+      state = state.copyWith(
+        displayActual: state.valorPendienteMultiplicacion!.toInt().toString(),
+        limpiarPendiente: true,
+      );
+      _persistir();
+      return;
+    }
+
     final actual = state.displayActual;
     if (actual.length <= 1) {
       state = state.copyWith(displayActual: '0');
@@ -127,41 +179,25 @@ class CalculatorNotifier extends FamilyNotifier<CalculatorState, PerfilColor> {
     _persistir();
   }
 
+  /// Botón "C": limpia el display y cancela la multiplicación pendiente si la hay.
   void limpiarDisplay() {
-    state = state.copyWith(displayActual: '0');
+    state = state.copyWith(displayActual: '0', limpiarPendiente: true);
     _persistir();
   }
 
-  /// Botón AC
   void limpiarTodo() {
     _guardarEnHistorialSiAplica();
     state = CalculatorState();
     _persistir();
   }
 
-  /// Carga un cálculo del historial en modo edición.
-  /// Si había algo sin guardar en este perfil, se guarda primero (como un AC implícito).
   void cargarParaEditar(Calculo calculo) {
     _guardarEnHistorialSiAplica();
-
     state = CalculatorState(
       productos: List.from(calculo.productos),
       displayActual: '0',
       origenId: calculo.id,
       modificado: false,
-    );
-    _persistir();
-  }
-
-  void cambiarResaltado(String productoId, ColorResaltado color) {
-    state = state.copyWith(
-      productos: state.productos.map((p) {
-        if (p.id != productoId) return p;
-        // Si tocas la misma bandera que ya estaba activa, se desactiva (vuelve a "ninguno")
-        final nuevoColor = p.resaltado == color ? ColorResaltado.ninguno : color;
-        return p.copyWith(resaltado: nuevoColor);
-      }).toList(),
-      modificado: true,
     );
     _persistir();
   }

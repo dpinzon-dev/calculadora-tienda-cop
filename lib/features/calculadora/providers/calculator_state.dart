@@ -17,26 +17,41 @@ class CalculatorState extends HiveObject {
   @HiveField(3)
   final bool modificado;
 
+  /// Cuando el usuario presiona "X", el precio ya tecleado se guarda aquí
+  /// y el display se reinicia para recibir la CANTIDAD.
+  /// Si es null, estamos en modo normal (tecleando un precio).
+  @HiveField(4)
+  final double? valorPendienteMultiplicacion;
+
   CalculatorState({
     this.productos = const [],
     this.displayActual = '0',
     this.origenId,
     this.modificado = false,
+    this.valorPendienteMultiplicacion,
   });
 
   double get total => productos.fold(0, (sum, p) => sum + p.total);
+
+  /// true cuando el usuario ya presionó "X" y está esperando teclear la cantidad.
+  bool get enModoMultiplicar => valorPendienteMultiplicacion != null;
 
   CalculatorState copyWith({
     List<Producto>? productos,
     String? displayActual,
     String? origenId,
     bool? modificado,
+    double? valorPendienteMultiplicacion,
+    bool limpiarPendiente = false,
   }) {
     return CalculatorState(
       productos: productos ?? this.productos,
       displayActual: displayActual ?? this.displayActual,
       origenId: origenId ?? this.origenId,
       modificado: modificado ?? this.modificado,
+      valorPendienteMultiplicacion: limpiarPendiente
+          ? null
+          : (valorPendienteMultiplicacion ?? this.valorPendienteMultiplicacion),
     );
   }
 }
