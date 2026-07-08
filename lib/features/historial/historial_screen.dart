@@ -7,6 +7,7 @@ import '../../data/models/perfil_color.dart';
 import '../../data/repositories/historial_repository.dart';
 import '../calculadora/providers/calculator_notifier.dart';
 import '../calculadora/providers/perfil_activo_provider.dart';
+import '../credits/credits_screen.dart';
 
 final historialProvider = FutureProvider.autoDispose<List<Calculo>>((ref) async {
   return HistorialRepository().listarTodos();
@@ -31,7 +32,18 @@ class HistorialScreen extends ConsumerWidget {
     final historialAsync = ref.watch(historialProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Historial de cálculos', style: TextStyle(color: Colors.white))),
+      appBar: AppBar(
+        title: const Text('Historial de cálculos', style: TextStyle(color: Colors.white)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CreditsScreen()),
+            ),
+          ),
+        ],
+      ),
       body: historialAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: Colors.white)),
         error: (err, _) => Center(
