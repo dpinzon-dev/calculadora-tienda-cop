@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/theme.dart';
 import '../../../core/utils/formato_cop.dart';
 import 'teclado_numerico.dart';
 
@@ -60,13 +61,14 @@ class _DevolucionSheetState extends State<DevolucionSheet> {
                   children: [
                     const Text(
                       'Total cuenta',
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     ),
                     Text(
                       formatearCOP(widget.totalCuenta),
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary
                       ),
                     ),
                   ],
@@ -76,13 +78,14 @@ class _DevolucionSheetState extends State<DevolucionSheet> {
                   children: [
                     const Text(
                       'Pago con',
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     ),
                     Text(
                       pagado == 0 ? '—' : formatearCOP(pagado),
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary
                       ),
                     ),
                   ],
@@ -98,22 +101,22 @@ class _DevolucionSheetState extends State<DevolucionSheet> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: vuelto >= 0
-                    ? const Color(0xFFDCEDC8)
-                    : const Color(0xFFFFCDD2),
+                    ? AppColors.successBackground
+                    : AppColors.dangerBackground,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
                 children: [
                   const Text(
                     'Vuelto',
-                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                    style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
                   ),
                   Text(
                     pagado == 0 ? '—' : formatearCOP(vuelto.abs()),
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: vuelto >= 0 ? Colors.black87 : Colors.red[700],
+                      color: vuelto >= 0 ? AppColors.textPrimary : AppColors.danger,
                     ),
                   ),
                 ],
@@ -127,14 +130,14 @@ class _DevolucionSheetState extends State<DevolucionSheet> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
+                color: AppColors.surfaceMuted,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.black12),
               ),
               child: Text(
                 formatearCOP(pagado),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 22),
+                style: const TextStyle(fontSize: 22, color: AppColors.textPrimary),
               ),
             ),
 
@@ -159,7 +162,7 @@ class _DevolucionSheetState extends State<DevolucionSheet> {
                       padding: const EdgeInsets.all(4),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: AppColors.primaryButton,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                             vertical: 18,

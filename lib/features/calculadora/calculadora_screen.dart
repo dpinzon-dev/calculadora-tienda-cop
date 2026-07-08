@@ -2,6 +2,7 @@ import 'package:calculadora_tienda/features/calculadora/providers/calculator_sta
 import 'package:calculadora_tienda/features/calculadora/providers/perfil_activo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/theme.dart';
 import '../../core/utils/formato_cop.dart';
 import '../../data/models/perfil_color.dart';
 import '../historial/historial_screen.dart';
@@ -59,9 +60,13 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
     _cantidadAnterior = state.productos.length;
 
     return Scaffold(
+      // Ya viene definido en AppTheme.scaffoldBackgroundColor; se deja
+      // explícito acá solo por claridad de lectura, se puede quitar.
+      backgroundColor: AppColors.primary,
       appBar: AppBar(
+        // backgroundColor y iconTheme también los hereda de AppTheme.appBarTheme
         leading: IconButton(
-          icon: const Icon(Icons.history),
+          icon: const Icon(Icons.history, color: Colors.white),
           onPressed: () {
             Navigator.push(
               context,
@@ -117,14 +122,14 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
               children: [
                 _BotonLateral(
                   texto: "AC",
-                  color: Colors.red,
+                  color: AppColors.danger,
                   onTap: notifier.limpiarTodo,
                 ),
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFB2EBF2),
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(10),
                     ),
 
@@ -137,14 +142,14 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                       child: Text(
                         formatearCOP(state.total),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                       ),
                     ),
                   ),
                 ),
                 _BotonLateral(
                   texto: "AC",
-                  color: Colors.red,
+                  color: AppColors.danger,
                   onTap: notifier.limpiarTodo,
                 ),
               ],
@@ -158,7 +163,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
               children: [
                 _BotonLateral(
                   texto: "C",
-                  color: Colors.orange,
+                  color: AppColors.warning,
                   onTap: notifier.limpiarDisplay,
                 ),
                 Expanded(
@@ -166,7 +171,7 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDCEDC8),
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -174,13 +179,13 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
                           ? '${formatearCOP(state.valorPendienteMultiplicacion!)} × ${state.displayActual == '0' ? '' : state.displayActual}'
                           : formatearCOP(double.tryParse(state.displayActual) ?? 0),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 24),
+                      style: const TextStyle(fontSize: 24, color: AppColors.textPrimary),
                     ),
                   ),
                 ),
                 _BotonLateral(
                   texto: "C",
-                  color: Colors.orange,
+                  color: AppColors.warning,
                   onTap: notifier.limpiarDisplay,
                 ),
               ],
@@ -240,26 +245,29 @@ class _ProductList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return state.productos.isEmpty
-        ? const Center(child: Text('Agrega productos abajo'))
+        ? const Center(child: Text('Agrega productos abajo', style: TextStyle(color: Colors.white)))
         : ListView.builder(
-            controller: _scrollController,
-            itemCount: state.productos.length,
-            itemBuilder: (context, index) {
-              final producto = state.productos[index];
-              return ProductoCard(
-                producto: producto,
-                onIncrementar: () => notifier.incrementarCantidad(producto.id),
-                onDecrementar: () => notifier.decrementarCantidad(producto.id),
-                onEliminar: () => notifier.eliminarProducto(producto.id),
-                onCambiarResaltado: (color) =>
-                    notifier.cambiarResaltado(producto.id, color),
-              );
-            },
-          );
+      controller: _scrollController,
+      itemCount: state.productos.length,
+      itemBuilder: (context, index) {
+        final producto = state.productos[index];
+        return ProductoCard(
+          producto: producto,
+          onIncrementar: () => notifier.incrementarCantidad(producto.id),
+          onDecrementar: () => notifier.decrementarCantidad(producto.id),
+          onEliminar: () => notifier.eliminarProducto(producto.id),
+          onCambiarResaltado: (color) =>
+              notifier.cambiarResaltado(producto.id, color),
+        );
+      },
+    );
   }
 }
 
 /// PERFILES
+/// Nota: los colores rojo/azul/verde acá representan "perfiles" que el
+/// usuario elige (identidad de un cálculo), no son parte de la paleta de
+/// marca, por eso se mantienen como Colors.* explícitos y no en AppColors.
 class _PerfilCirculo extends StatelessWidget {
   final Color color;
   final bool activo;
@@ -281,7 +289,7 @@ class _PerfilCirculo extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: color,
-          border: activo ? Border.all(color: Colors.black, width: 2.5) : null,
+          border: activo ? Border.all(color: Colors.white, width: 2.5) : null,
         ),
       ),
     );
@@ -303,7 +311,7 @@ class _BotonLateral extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
@@ -359,7 +367,7 @@ class _ColumnaLateral extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: ElevatedButton(
-                style: _estilo(Colors.blue),
+                style: _estilo(AppColors.primaryButton),
                 onPressed: onBackspace,
                 child: const Center(
                   child: Icon(
@@ -378,7 +386,7 @@ class _ColumnaLateral extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: ElevatedButton(
-                style: _estilo(Colors.purple),
+                style: _estilo(AppColors.multiply),
                 onPressed: onMultiplicar,
                 child: const Center(
                   child: Text(
@@ -400,7 +408,7 @@ class _ColumnaLateral extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: ElevatedButton(
-                style: _estilo(Colors.green),
+                style: _estilo(AppColors.success),
                 onPressed: onAgregar,
                 child: const Center(
                   child: Icon(Icons.add, color: Colors.white, size: 28),
@@ -409,184 +417,6 @@ class _ColumnaLateral extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _VueltoSheet extends StatefulWidget {
-  final double totalCuenta;
-  const _VueltoSheet({required this.totalCuenta});
-
-  @override
-  State<_VueltoSheet> createState() => _VueltoSheetState();
-}
-
-class _VueltoSheetState extends State<_VueltoSheet> {
-  String _display = '0';
-
-  void _teclear(String digito) {
-    setState(() {
-      _display = _display == '0' ? digito : _display + digito;
-    });
-  }
-
-  void _borrar() {
-    setState(() {
-      if (_display.length <= 1) {
-        _display = '0';
-      } else {
-        _display = _display.substring(0, _display.length - 1);
-      }
-    });
-  }
-
-  static const _filas = [
-    ['7', '8', '9'],
-    ['4', '5', '6'],
-    ['1', '2', '3'],
-    ['0', '00', '000'],
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final pagado = double.tryParse(_display) ?? 0;
-    final vuelto = pagado - widget.totalCuenta;
-
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Indicador de arrastre
-            Container(
-              width: 40, height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.black26,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            // Fila: cuenta — pago
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Total cuenta', style: TextStyle(fontSize: 12, color: Colors.black54)),
-                    Text(formatearCOP(widget.totalCuenta),
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Text('Pago con', style: TextStyle(fontSize: 12, color: Colors.black54)),
-                    Text(
-                      pagado == 0 ? '—' : formatearCOP(pagado),
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-
-            const Divider(height: 24),
-
-            // Vuelto
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: vuelto >= 0 ? const Color(0xFFDCEDC8) : const Color(0xFFFFCDD2),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  const Text('Vuelto', style: TextStyle(fontSize: 12, color: Colors.black54)),
-                  Text(
-                    pagado == 0 ? '—' : formatearCOP(vuelto.abs()),
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: vuelto >= 0 ? Colors.black87 : Colors.red[700],
-                    ),
-                  ),
-                  if (pagado > 0 && vuelto < 0)
-                    Text(
-                      'Faltan ${formatearCOP(vuelto.abs())}',
-                      style: TextStyle(fontSize: 12, color: Colors.red[700]),
-                    ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Display del pago
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.black12),
-              ),
-              child: Text(
-                formatearCOP(pagado),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 22),
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Teclado numérico local
-            ...(_filas.map((fila) => Row(
-              children: fila.map((d) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(3),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD9D9D9),
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                      elevation: 0,
-                    ),
-                    onPressed: () => _teclear(d),
-                    child: Text(d, style: const TextStyle(fontSize: 18)),
-                  ),
-                ),
-              )).toList(),
-            ))),
-
-            // Botón borrar
-            Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(3),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                        elevation: 0,
-                      ),
-                      onPressed: _borrar,
-                      child: const Icon(Icons.chevron_left, size: 24),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }

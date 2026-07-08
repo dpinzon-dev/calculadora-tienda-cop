@@ -82,10 +82,16 @@ class CalculatorNotifier extends FamilyNotifier<CalculatorState, PerfilColor> {
       final cantidad = int.tryParse(state.displayActual) ?? 0;
       if (cantidad <= 0) return;
 
+      // El número más grande siempre es el valorUnitario,
+      // el más pequeño es la cantidad.
+      final pendiente = state.valorPendienteMultiplicacion!;
+      final valorUnitario = pendiente > cantidad ? pendiente : cantidad.toDouble();
+      final cantidadFinal = pendiente > cantidad ? cantidad : pendiente.toInt();
+
       final nuevoProducto = Producto(
         id: _uuid.v4(),
-        valorUnitario: state.valorPendienteMultiplicacion!,
-        cantidad: cantidad,
+        valorUnitario: valorUnitario,
+        cantidad: cantidadFinal,
       );
 
       state = state.copyWith(

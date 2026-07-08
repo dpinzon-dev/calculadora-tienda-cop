@@ -29,14 +29,9 @@ class TecladoNumerico extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(4),
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD9D9D9),
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
+                  // Al estar definido en AppTheme.elevatedButtonTheme,
+                  // ya no hace falta repetir backgroundColor/padding/shape
+                  // acá. Solo heredamos el estilo base.
                   onPressed: () => onDigito(digito),
                   child: Center(
                     child: Text(digito, style: const TextStyle(fontSize: 20)),

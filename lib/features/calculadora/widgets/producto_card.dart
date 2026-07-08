@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/theme.dart';
 import '../../../core/utils/formato_cop.dart';
 import '../../../data/models/color_resaltado.dart';
 import '../../../data/models/producto.dart';
@@ -34,7 +35,11 @@ class ProductoCard extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+            style: TextButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              foregroundColor: Colors.white, // Color del texto
+            ),
+            child: Text('Eliminar', style: TextStyle(color: AppColors.surface)),
           ),
         ],
       ),
@@ -48,7 +53,7 @@ class ProductoCard extends StatelessWidget {
   Color get _colorFondo {
     switch (producto.resaltado) {
       case ColorResaltado.ninguno:
-        return const Color(0xFFE0E0E0);
+        return AppColors.cardNeutral;
       case ColorResaltado.amarillo:
         return const Color(0xFFFFF3C4);
       case ColorResaltado.morado:
@@ -71,7 +76,7 @@ class ProductoCard extends StatelessWidget {
         children: [
           // Botón eliminar
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
+            icon: Icon(Icons.delete, color: AppColors.danger),
             onPressed: () => _confirmarEliminar(context),
           ),
 
@@ -88,6 +93,7 @@ class ProductoCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   if (producto.cantidad > 1)
@@ -95,7 +101,7 @@ class ProductoCard extends StatelessWidget {
                       formatearCOP(producto.valorUnitario),
                       style: const TextStyle(
                         fontSize: 13,
-                        color: Colors.black54,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                 ],
@@ -109,10 +115,10 @@ class ProductoCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black54),
+                  border: Border.all(color: AppColors.textPrimary),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text('x${producto.cantidad}'),
+                child: Text('x${producto.cantidad}',style: const TextStyle(color: AppColors.textPrimary),),
               ),
             ],
           ),
@@ -146,13 +152,13 @@ class ProductoCard extends StatelessWidget {
           const SizedBox(width: 8),
           _CircleButton(
             icon: Icons.remove,
-            color: Colors.red,
+            color: AppColors.danger,
             onTap: onDecrementar,
           ),
           const SizedBox(width: 6),
           _CircleButton(
             icon: Icons.add,
-            color: Colors.green,
+            color: AppColors.success,
             onTap: onIncrementar,
           ),
         ],
