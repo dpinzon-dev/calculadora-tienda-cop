@@ -1,0 +1,48 @@
+name: calculadora_tienda
+description: "Calculadora para tienda"
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+
+version: 1.0.4+1
+
+environment:
+  sdk: ^3.12.2
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_launcher_icons: ^0.14.4
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: 2.6.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  uuid: ^4.5.3
+  intl: ^0.20.2
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  hive_generator: ^2.0.1
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.13
+  hive_test: ^1.0.1
+
+
+flutter:
+
+
+  uses-material-design: true
+
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/logo.png"
+  adaptive_icon_background: "#FFFFFF"  # color de fondo para el ícono adaptativo
+
+
