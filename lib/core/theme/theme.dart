@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 
 /// Paleta de colores de la app.
-///
-/// Como senior: mantener los colores como `static const` (y no como
-/// instancias de un objeto) evita crear objetos en cada rebuild y permite
-/// que el compilador los trate como constantes reales, lo cual es
-/// importante en widgets que se reconstruyen muy seguido (ej: cada dígito
-/// tecleado en la calculadora).
 class AppColors {
   AppColors._(); // Evita instanciar esta clase, es solo un namespace.
 
@@ -36,14 +30,6 @@ class AppColors {
 }
 
 /// Tema global de la aplicación.
-///
-/// Nota de arquitectura: en vez de repetir `ElevatedButton.styleFrom(...)`
-/// en cada widget (como pasa hoy en TecladoNumerico, DevolucionSheet, etc.),
-/// definimos el estilo base una sola vez en `elevatedButtonTheme`. Cada
-/// botón puede seguir sobreescribiendo color puntual (ej: el rojo de "AC"),
-/// pero el padding, el radio y la tipografía quedan centralizados.
-/// Esto reduce el árbol de widgets reconstruido y evita inconsistencias
-/// visuales entre pantallas.
 class AppTheme {
   AppTheme._();
 

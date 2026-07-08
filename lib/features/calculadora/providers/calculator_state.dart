@@ -17,9 +17,6 @@ class CalculatorState extends HiveObject {
   @HiveField(3)
   final bool modificado;
 
-  /// Cuando el usuario presiona "X", el precio ya tecleado se guarda aquí
-  /// y el display se reinicia para recibir la CANTIDAD.
-  /// Si es null, estamos en modo normal (tecleando un precio).
   @HiveField(4)
   final double? valorPendienteMultiplicacion;
 

@@ -21,10 +21,6 @@ class CalculadoraScreen extends ConsumerStatefulWidget {
 class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
   final _scrollController = ScrollController();
   int _cantidadAnterior = 0;
-
-  // Altura fija del bloque de teclado (flechas + números + flechas).
-  // Al no usar Expanded aquí, el bloque queda pegado abajo y no se estira
-  // aunque la pantalla sea más larga; el espacio extra lo absorbe la lista.
   static const double _alturaTeclado = 300;
 
   @override
@@ -53,15 +49,12 @@ class _CalculadoraScreenState extends ConsumerState<CalculadoraScreen> {
     final state = ref.watch(calculatorProvider(perfilActivo));
     final notifier = ref.read(calculatorProvider(perfilActivo).notifier);
 
-    // Si se agregó un producto nuevo, desliza la lista hasta el final
     if (state.productos.length > _cantidadAnterior) {
       _scrollAlFinal();
     }
     _cantidadAnterior = state.productos.length;
 
     return Scaffold(
-      // Ya viene definido en AppTheme.scaffoldBackgroundColor; se deja
-      // explícito acá solo por claridad de lectura, se puede quitar.
       backgroundColor: AppColors.primary,
       appBar: AppBar(
         // backgroundColor y iconTheme también los hereda de AppTheme.appBarTheme
@@ -265,9 +258,6 @@ class _ProductList extends StatelessWidget {
 }
 
 /// PERFILES
-/// Nota: los colores rojo/azul/verde acá representan "perfiles" que el
-/// usuario elige (identidad de un cálculo), no son parte de la paleta de
-/// marca, por eso se mantienen como Colors.* explícitos y no en AppColors.
 class _PerfilCirculo extends StatelessWidget {
   final Color color;
   final bool activo;
@@ -333,7 +323,7 @@ class _BotonLateral extends StatelessWidget {
   }
 }
 
-/// Columna lateral del teclado: C (10%), borrar "<" (40%) y agregar "+" (40%).
+/// Columna lateral del teclado
 class _ColumnaLateral extends StatelessWidget {
   final VoidCallback onBackspace;
   final VoidCallback onAgregar;
