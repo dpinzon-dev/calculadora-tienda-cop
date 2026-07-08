@@ -161,6 +161,7 @@ class _DevolucionSheetState extends State<DevolucionSheet> {
                     child: Padding(
                       padding: const EdgeInsets.all(4),
                       child: ElevatedButton(
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryButton,
                           foregroundColor: Colors.white,
@@ -174,7 +175,7 @@ class _DevolucionSheetState extends State<DevolucionSheet> {
                           elevation: 0,
                         ),
                         onPressed: _borrar,
-                        child: const Icon(Icons.chevron_left, size: 24),
+                        child: const Center(child: Icon(Icons.chevron_left, size: 24,)),
                       ),
                     ),
                   ),

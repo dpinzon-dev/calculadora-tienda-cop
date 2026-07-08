@@ -21,8 +21,9 @@ Calculadora de ventas para tiendas colombianas desarrollada en Flutter. Maneja m
 
 ## 📱 Capturas de pantalla
 
-> *Próximamente*
-
+| Calculadora                                  | Historial                                | Cambio                                 |
+|----------------------------------------------|------------------------------------------|----------------------------------------|
+| ![Calculadora](screenshots/calculadora.jpeg) | ![Historial](screenshots/historial.jpeg) | ![Cambio](screenshots/devolucion.jpeg) |
 ---
 
 ## 🏗️ Arquitectura

@@ -146,6 +146,9 @@ class _DetalleCalculoSheet extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _colorDePerfil(calculo.perfil),
                     foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
                   onPressed: () {
                     // Cambiamos al perfil correspondiente y cargamos el cálculo en modo edición
